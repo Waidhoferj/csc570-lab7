@@ -69,10 +69,10 @@ def train_model(
     return model, hist
 
 
-def evaluate_model(model_builder: ModelCreator, seed=42, verbose=False, weighted=False):
+def evaluate_model(model_builder: ModelCreator, seed=42, verbose=True, weighted=False):
     """
     Performs Kfold cross validation on a model.
-    Outputs metrics to the logs folder
+    Outputs metrics to the logs folder and returns average fold accuracy.
     """
     X, y = load_data()
     accuracies = []
@@ -94,10 +94,16 @@ def evaluate_model(model_builder: ModelCreator, seed=42, verbose=False, weighted
             weighted=weighted,
         )
         _, accuracy = model.evaluate(x_val, y_val)
-        print(f"Fold accuracy: {accuracy}")
+        if verbose:
+            print(f"Fold accuracy: {accuracy}")
         accuracies.append(accuracy)
-    print("\nTotal CV accuracy", np.mean(accuracies) * 100.0)
+    avg_accuracy = np.mean(accuracies)
+    if verbose:
+        print("\nAverage CV accuracy", avg_accuracy * 100.0)
+    return avg_accuracy
 
 
 if __name__ == "__main__":
-    evaluate_model(ModelCreator(BaseModel), verbose=True, seed=5, weighted=True)
+    evaluate_model(
+        ModelCreator(ResidualClassifier), verbose=True, seed=5, weighted=True
+    )
