@@ -31,14 +31,14 @@ def train_model(
     model: Model,
     x_train: np.ndarray,
     y_train: np.ndarray,
-    epochs=400,
+    epochs=25,
     batch_size=128,
     validation_split=0.2,
     verbose=True,
     weighted=False,
     log_dir=None,
 ):
-    callbacks = [tf.keras.callbacks.EarlyStopping(patience=10)]
+    callbacks = []
     if log_dir is not None:
         callbacks.append(
             tf.keras.callbacks.TensorBoard(
@@ -50,8 +50,8 @@ def train_model(
         )
 
     if weighted:
-        ones_weight = np.sum(y_train == 0) / len(y_train)
-        zeros_weight = 1.0 - ones_weight
+        ones_weight = len(y_train) / (2.0 * np.sum(y_train == 1))
+        zeros_weight = len(y_train) / (2.0 * np.sum(y_train == 0))
         class_weight = {0: zeros_weight, 1: ones_weight}
     else:
         class_weight = {0: 1.0, 1: 1.0}
@@ -69,7 +69,7 @@ def train_model(
     return model, hist
 
 
-def evaluate_model(model_builder: ModelCreator, seed=42, verbose=False):
+def evaluate_model(model_builder: ModelCreator, seed=42, verbose=False, weighted=False):
     """
     Performs Kfold cross validation on a model.
     Outputs metrics to the logs folder
@@ -86,12 +86,18 @@ def evaluate_model(model_builder: ModelCreator, seed=42, verbose=False):
         x_train, y_train = X[i_train], y[i_train]
         x_val, y_val = X[i_val], y[i_val]
         model, _ = train_model(
-            model, x_train, y_train, verbose=verbose, log_dir=run_folder
+            model,
+            x_train,
+            y_train,
+            verbose=verbose,
+            log_dir=run_folder,
+            weighted=weighted,
         )
         _, accuracy = model.evaluate(x_val, y_val)
+        print(f"Fold accuracy: {accuracy}")
         accuracies.append(accuracy)
-    print("Total CV accuracy", np.mean(accuracies) * 100.0)
+    print("\nTotal CV accuracy", np.mean(accuracies) * 100.0)
 
 
 if __name__ == "__main__":
-    evaluate_model(ModelCreator(SimpleResidual), verbose=True)
+    evaluate_model(ModelCreator(BaseModel), verbose=True, seed=5, weighted=True)
