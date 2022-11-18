@@ -1,0 +1,14 @@
+name: lab7
+channels:
+  - anaconda
+  - conda-forge
+dependencies:
+  - python=3.9
+  - numpy
+  - pandas
+  - matplotlib
+  - scikit-learn
+  - notebook
+  - tensorflow
+
+prefix: /opt/homebrew/Caskroom/miniforge/base
