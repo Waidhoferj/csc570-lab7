@@ -7,7 +7,7 @@ import tensorflow as tf
 from tensorflow.keras import layers, Model
 from sklearn.model_selection import train_test_split
 from models.model_creator import ModelCreator
-from models.residual import ResidualClassifier, SimpleResidual
+from models.simple import SimpleClassifier
 from models.base import BaseModel
 from datetime import datetime
 
@@ -32,8 +32,7 @@ def train_model(
     x_train: np.ndarray,
     y_train: np.ndarray,
     epochs=25,
-    batch_size=128,
-    validation_split=0.2,
+    batch_size=64,
     verbose=True,
     weighted=False,
     log_dir=None,
@@ -59,7 +58,6 @@ def train_model(
     hist = model.fit(
         x_train,
         y_train,
-        validation_split=validation_split,
         callbacks=callbacks,
         class_weight=class_weight,
         epochs=epochs,
@@ -69,7 +67,7 @@ def train_model(
     return model, hist
 
 
-def evaluate_model(model_builder: ModelCreator, seed=42, verbose=True, weighted=False):
+def evaluate_model(model_builder: ModelCreator, seed=234, verbose=True, weighted=False):
     """
     Performs Kfold cross validation on a model.
     Outputs metrics to the logs folder and returns average fold accuracy.
@@ -92,6 +90,7 @@ def evaluate_model(model_builder: ModelCreator, seed=42, verbose=True, weighted=
             verbose=verbose,
             log_dir=run_folder,
             weighted=weighted,
+            epochs=25,
         )
         _, accuracy = model.evaluate(x_val, y_val)
         if verbose:
@@ -104,6 +103,4 @@ def evaluate_model(model_builder: ModelCreator, seed=42, verbose=True, weighted=
 
 
 if __name__ == "__main__":
-    evaluate_model(
-        ModelCreator(ResidualClassifier), verbose=True, seed=5, weighted=True
-    )
+    evaluate_model(ModelCreator(SimpleClassifier), verbose=True, seed=5, weighted=True)
