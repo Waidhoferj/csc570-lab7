@@ -3,10 +3,6 @@ from tensorflow.keras import layers, Model, Sequential
 
 
 class SimpleClassifier(Sequential):
-    """
-    Basic model described by Sumona
-    """
-
     def __init__(
         self,
     ):
